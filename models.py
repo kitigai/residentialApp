@@ -2,9 +2,11 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
+import os
  
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:114514YjU@localhost/residential"
+# app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:114514YjU@localhost/residential"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get('DATABASE_URL')
 db = SQLAlchemy(app)
 migrate=Migrate(app,db) #Initializing migrate.
 manager = Manager(app)
