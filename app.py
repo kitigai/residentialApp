@@ -24,6 +24,8 @@ model_residents = api.model('Residents', {
     'guaranteeCompany': fields.String,
     'roomNo': fields.String,
     'parkingLotNo': fields.String,
+    'lastTransferDate': fields.String,
+    'lastBillingDate': fields.String,
     # 'transfer': fields.Nested(model_transfer),
     # 'billing': fields.Nested(model_billing),
 })
@@ -107,6 +109,13 @@ class GetResidents(Resource):
     @api.marshal_with(model_residents)
     def get(self):
         res = Residents.query.all()
+        for idx, re in enumerate(res):
+            if(re.transfer){
+                setattr(res[idx], 'lastTransferDate', re.transfer[0].transferDate)
+            }
+            if(re.billing){
+                setattr(res[idx], 'lastBillingDate', re.billing[0].billingDate)
+            }
         return res, 200, {'Access-Control-Allow-Origin':'*'}
     # create
     def post(self):
