@@ -25,6 +25,7 @@ model_residents = api.model('Residents', {
     'roomNo': fields.String,
     'parkingLotNo': fields.String,
     'lastTransferDate': fields.String,
+    'lastTransferAmount':fields.Integer,
     'lastBillingDate': fields.String,
     # 'transfer': fields.Nested(model_transfer),
     # 'billing': fields.Nested(model_billing),
@@ -112,6 +113,7 @@ class GetResidents(Resource):
         for idx, re in enumerate(res):
             if(re.transfer):
                 setattr(res[idx], 'lastTransferDate', re.transfer[0].transferDate)
+                setattr(res[idx], 'lastTransferAmount', re.transfer[0].transferAmount)
             if(re.billing):
                 setattr(res[idx], 'lastBillingDate', re.billing[0].billingDate)
         return res, 200, {'Access-Control-Allow-Origin':'*'}
