@@ -107,7 +107,7 @@ class GetResidents(Resource):
     @api.marshal_with(model_residents)
     def get(self):
         res = Residents.query.all()
-        return res
+        return res, 200, {'Access-Control-Allow-Origin':'*'}
     # create
     def post(self):
         args = residents_parser.parse_args()
