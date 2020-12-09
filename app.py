@@ -89,7 +89,7 @@ class GetApartments(Resource):
         return "success"  
     def put(self):
         args = apartment_update_parser.parse_args()
-        ap = Apartment.query.filter_by(id=args['id']).first()
+        ap = Apartment.query.get(args['id'])
         if ap == None:
             abort(400)
         ap.name = args['name']
@@ -127,7 +127,7 @@ class GetResidents(Resource):
     # update
     def put(self):
         args = residents_update_parser.parse_args()
-        res = Residents.query.filter_by(id=args["id"]).first()
+        res = Residents.query.get(args["id"])
         for key, value in args.items():
             setattr(res, key, value)                
         db.session.add(res)
@@ -136,15 +136,27 @@ class GetResidents(Resource):
 
 @api.route('/transfer')
 class CreateTransfer(Resource):
+    # create new transfer
     def post(self):
         args = transfer_parser.parse_args()
+        if(Transfer.query.filter_by(args['lastTransferDate'])).filter_by(args['residents_id'])):
+            abort(303)
         tr = Transfer(**args)
         db.session.add(tr)
+        # get latest transfer and compare 
+        trBefore = Transfer.query.filter_by(args['residents_id']).order_by(Transfer.transferDate.desc()).first()
+        if (tr.transferDate > trBefore.transferDate):
+            # increment resident's transferSatisfiedMonth
+            re = Residents.query.get(args['residents_id']
+            if(re.transferSatisfiedMonth){
+                re.transferSatisfiedMonth = re.transferSatisfiedMonth + relativedelta(months=+1)
+                db.session.add(re)
+            }
         db.session.commit()
         return "success"
     def delete(self):
         args = transfer_delete_parser.parse_args()
-        tr = Transfer.query.filter_by(id=args['id']).first()
+        tr = Transfer.query.get(args['id'])
         db.session.delete(tr)
         db.session.commit()
         return "success", 204
@@ -158,7 +170,7 @@ class CreateBilling(Resource):
         return "success"
     def delete(self):
         args = billing_delete_parser.parse_args()
-        br = Billing.query.filter_by(id=args['id']).first()
+        br = Billing.query.get(args['id'])
         db.session.delete(br)
         db.session.commit()
 
