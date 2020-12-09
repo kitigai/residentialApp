@@ -139,7 +139,8 @@ class CreateTransfer(Resource):
     # create new transfer
     def post(self):
         args = transfer_parser.parse_args()
-        if(Transfer.query.filter_by(args['lastTransferDate'])).filter_by(args['residents_id'])):
+        # if same date record has alredy been existing
+        if(Transfer.query.filter_by(args['lastTransferDate']).filter_by(args['residents_id'])):
             abort(303)
         tr = Transfer(**args)
         db.session.add(tr)
@@ -147,11 +148,11 @@ class CreateTransfer(Resource):
         trBefore = Transfer.query.filter_by(args['residents_id']).order_by(Transfer.transferDate.desc()).first()
         if (tr.transferDate > trBefore.transferDate):
             # increment resident's transferSatisfiedMonth
-            re = Residents.query.get(args['residents_id']
-            if(re.transferSatisfiedMonth){
+            re = Residents.query.get(args['residents_id'])
+            if(re.transferSatisfiedMonth):
                 re.transferSatisfiedMonth = re.transferSatisfiedMonth + relativedelta(months=+1)
                 db.session.add(re)
-            }
+            
         db.session.commit()
         return "success"
     def delete(self):
