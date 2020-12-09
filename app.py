@@ -29,7 +29,7 @@ model_residents = api.model('Residents', {
     # 'transfer': fields.Nested(model_transfer),
     # 'billing': fields.Nested(model_billing),
 })
-model_single_resident = model_residents.clone('Residents', {
+model_single_resident = model_residents.clone('Residents_Single', {
     'transfer': fields.Nested(model_transfer),
     'billing': fields.Nested(model_billing),
 })
@@ -110,12 +110,10 @@ class GetResidents(Resource):
     def get(self):
         res = Residents.query.all()
         for idx, re in enumerate(res):
-            if(re.transfer){
+            if(re.transfer):
                 setattr(res[idx], 'lastTransferDate', re.transfer[0].transferDate)
-            }
-            if(re.billing){
+            if(re.billing):
                 setattr(res[idx], 'lastBillingDate', re.billing[0].billingDate)
-            }
         return res, 200, {'Access-Control-Allow-Origin':'*'}
     # create
     def post(self):
