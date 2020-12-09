@@ -69,7 +69,7 @@ transfer_delete_parser = reqparse.RequestParser()
 transfer_delete_parser.add_argument('id', type=int, location='json', required=True)
 
 billing_parser = reqparse.RequestParser()
-billing_parser.add_argument('billingDate', type=datetime, location='json', required=True)
+billing_parser.add_argument('billingDate', location='json', required=True)
 billing_parser.add_argument('residents_id', type=int, location='json', required=True)
 
 billing_delete_parser = reqparse.RequestParser()
