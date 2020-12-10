@@ -140,12 +140,12 @@ class CreateTransfer(Resource):
     def post(self):
         args = transfer_parser.parse_args()
         # if same date record has alredy been existing
-        if(Transfer.query.filter_by(args['lastTransferDate']).filter_by(args['residents_id'])):
-            abort(303)
+        if(Transfer.query.filter_by(transferDate=args['transferDate']).filter_by(residents_id=args['residents_id'])):
+            abort(409)
         tr = Transfer(**args)
         db.session.add(tr)
         # get latest transfer and compare 
-        trBefore = Transfer.query.filter_by(args['residents_id']).order_by(Transfer.transferDate.desc()).first()
+        trBefore = Transfer.query.filter_by(residents_id=args['residents_id']).order_by(Transfer.transferDate.desc()).first()
         if (tr.transferDate > trBefore.transferDate):
             # increment resident's transferSatisfiedMonth
             re = Residents.query.get(args['residents_id'])
@@ -176,4 +176,4 @@ class CreateBilling(Resource):
         db.session.commit()
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
