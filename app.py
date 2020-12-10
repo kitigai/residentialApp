@@ -118,7 +118,7 @@ class GetResidents(Resource):
                 setattr(res[idx], 'lastTransferAmount', re.transfer[0].transferAmount)
             if(re.billing):
                 setattr(res[idx], 'lastBillingDate', re.billing[0].billingDate)
-        return res, 200, {'Access-Control-Allow-Origin':'*'}
+        return res
     # create
     def post(self):
         args = residents_parser.parse_args()
@@ -143,7 +143,8 @@ class CreateTransfer(Resource):
         args = transfer_parser.parse_args()
         # if same date record has alredy been existing
         if(Transfer.query.filter_by(transferDate=args['transferDate']).filter_by(residents_id=args['residents_id'])):
-            return "resource already exists", 409, {'Access-Control-Allow-Origin':'*'}
+            # return "resource already exists", 409, {'Access-Control-Allow-Origin':'*'}
+            abort(409)
         tr = Transfer(**args)
         db.session.add(tr)
         # get latest transfer and compare 
@@ -156,13 +157,13 @@ class CreateTransfer(Resource):
                 db.session.add(re)
             
         db.session.commit()
-        return "success", 200, {'Access-Control-Allow-Origin':'*'}
+        return "success"
     def delete(self):
         args = transfer_delete_parser.parse_args()
         tr = Transfer.query.get(args['id'])
         db.session.delete(tr)
         db.session.commit()
-        return "success", 204, {'Access-Control-Allow-Origin':'*'}
+        return "success", 204
     # def option(self):
     #     return "", 200, {'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers', '*'}
 
@@ -173,7 +174,7 @@ class CreateBilling(Resource):
         br = Billing(**args)
         db.session.add(br)
         db.session.commit()
-        return "success",200, {'Access-Control-Allow-Origin':'*'}
+        return "success"
     def delete(self):
         args = billing_delete_parser.parse_args()
         br = Billing.query.get(args['id'])
