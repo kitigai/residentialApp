@@ -135,14 +135,14 @@ class GetResidents(Resource):
         return "success"
 
 @api.route('/transfer')
-@api.header('Access-Control-Allow-Origin', '*', required=True)
+@api.header('Access-Control-Allow-Origin', '*')
 class CreateTransfer(Resource):
     # create new transfer
     def post(self):
         args = transfer_parser.parse_args()
         # if same date record has alredy been existing
         if(Transfer.query.filter_by(transferDate=args['transferDate']).filter_by(residents_id=args['residents_id'])):
-            abort(409)
+            return "resource already exists", 409, {'Access-Control-Allow-Origin', '*'}
         tr = Transfer(**args)
         db.session.add(tr)
         # get latest transfer and compare 
