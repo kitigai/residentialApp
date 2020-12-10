@@ -154,13 +154,13 @@ class CreateTransfer(Resource):
                 db.session.add(re)
             
         db.session.commit()
-        return "success"
+        return "success", 200, {'Access-Control-Allow-Origin':'*'}
     def delete(self):
         args = transfer_delete_parser.parse_args()
         tr = Transfer.query.get(args['id'])
         db.session.delete(tr)
         db.session.commit()
-        return "success", 204
+        return "success", 204, {'Access-Control-Allow-Origin':'*'}
 @api.route('/billing')
 class CreateBilling(Resource):
     def post(self):
@@ -168,12 +168,13 @@ class CreateBilling(Resource):
         br = Billing(**args)
         db.session.add(br)
         db.session.commit()
-        return "success"
+        return "success",200, {'Access-Control-Allow-Origin':'*'}
     def delete(self):
         args = billing_delete_parser.parse_args()
         br = Billing.query.get(args['id'])
         db.session.delete(br)
         db.session.commit()
+        return "success",200, {'Access-Control-Allow-Origin':'*'}
 
 if __name__ == '__main__':
     app.run(debug=True)
