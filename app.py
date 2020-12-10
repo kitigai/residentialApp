@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_restplus import Resource, Api, fields, reqparse
 from models import app, db, Apartment, Residents, Transfer, Billing
 import datetime
+from dateutil.relativedelta import relativedelta
 
 # app = Flask(__name__)
 CORS(app)
@@ -149,6 +150,7 @@ class CreateTransfer(Resource):
         tr = Transfer(**args)
         db.session.add(tr)
         # get latest transfer and compare 
+        newDate = datetime.datetime.strptime(args['transferDate'], "%Y-%m-%d")
         trBefore = Transfer.query.filter_by(residents_id=args['residents_id']).order_by(Transfer.transferDate.desc()).first()
         if (tr.transferDate > trBefore.transferDate):
             # increment resident's transferSatisfiedMonth
