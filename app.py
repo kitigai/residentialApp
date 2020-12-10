@@ -135,6 +135,7 @@ class GetResidents(Resource):
         return "success"
 
 @api.route('/transfer')
+@api.header('Access-Control-Allow-Origin', '*', required=True)
 class CreateTransfer(Resource):
     # create new transfer
     def post(self):
