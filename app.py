@@ -142,7 +142,7 @@ class CreateTransfer(Resource):
     def post(self):
         args = transfer_parser.parse_args()
         # if same date record has alredy been existing
-        if(Transfer.query.filter_by(transferDate=args['transferDate']).filter_by(residents_id=args['residents_id'])):
+        if(Transfer.query.filter_by(transferDate=args['transferDate']).filter_by(residents_id=args['residents_id'])).all():
             # return "resource already exists", 409, {'Access-Control-Allow-Origin':'*'}
             abort(409)
         tr = Transfer(**args)
