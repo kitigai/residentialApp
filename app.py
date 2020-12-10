@@ -1,9 +1,11 @@
 from flask import Flask, abort
+from flask_cors import CORS
 from flask_restplus import Resource, Api, fields, reqparse
 from models import app, db, Apartment, Residents, Transfer, Billing
 import datetime
 
 # app = Flask(__name__)
+CORS(app)
 api = Api(app)
 
 model_billing = api.model('Billing', {
@@ -141,7 +143,7 @@ class CreateTransfer(Resource):
         args = transfer_parser.parse_args()
         # if same date record has alredy been existing
         if(Transfer.query.filter_by(transferDate=args['transferDate']).filter_by(residents_id=args['residents_id'])):
-            return "resource already exists", 200, {'Access-Control-Allow-Origin':'*'}
+            return "resource already exists", 409, {'Access-Control-Allow-Origin':'*'}
         tr = Transfer(**args)
         db.session.add(tr)
         # get latest transfer and compare 
@@ -161,6 +163,9 @@ class CreateTransfer(Resource):
         db.session.delete(tr)
         db.session.commit()
         return "success", 204, {'Access-Control-Allow-Origin':'*'}
+    # def option(self):
+    #     return "", 200, {'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers', '*'}
+
 @api.route('/billing')
 class CreateBilling(Resource):
     def post(self):
@@ -174,7 +179,6 @@ class CreateBilling(Resource):
         br = Billing.query.get(args['id'])
         db.session.delete(br)
         db.session.commit()
-        return "success",200, {'Access-Control-Allow-Origin':'*'}
-
+        return "success"
 if __name__ == '__main__':
     app.run(debug=True)
