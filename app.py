@@ -143,22 +143,23 @@ class CreateTransfer(Resource):
     @api.marshal_with(model_residents)
     def post(self):
         args = transfer_parser.parse_args()
+        
         # if same date record has alredy been existing
         if(Transfer.query.filter_by(transferDate=args['transferDate']).filter_by(residents_id=args['residents_id'])).all():
             # return "resource already exists", 409, {'Access-Control-Allow-Origin':'*'}
             abort(409)
         tr = Transfer(**args)
-        db.session.add(tr)
         # get latest transfer and compare 
-        newDate = datetime.datetime.strptime(args['transferDate'], "%Y-%m-%d")
+        newDate = datetime.datetime.strptime(args['transferDate'], "%Y-%m-%d").date()
         trBefore = Transfer.query.filter_by(residents_id=args['residents_id']).order_by(Transfer.transferDate.desc()).first()
-        if (newDate > trBefore.transferDate):
+        if (trBefore and newDate > trBefore.transferDate):
             # increment resident's transferSatisfiedMonth
             re = Residents.query.get(args['residents_id'])
             if(re.transferSatisfiedMonth):
                 re.transferSatisfiedMonth = re.transferSatisfiedMonth + relativedelta(months=+1)
                 db.session.add(re)
-            
+
+        db.session.add(tr)
         db.session.commit()
         res = Residents.query.all()
         return res
