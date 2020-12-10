@@ -152,7 +152,7 @@ class CreateTransfer(Resource):
         # get latest transfer and compare 
         newDate = datetime.datetime.strptime(args['transferDate'], "%Y-%m-%d")
         trBefore = Transfer.query.filter_by(residents_id=args['residents_id']).order_by(Transfer.transferDate.desc()).first()
-        if (tr.transferDate > trBefore.transferDate):
+        if (newDate > trBefore.transferDate):
             # increment resident's transferSatisfiedMonth
             re = Residents.query.get(args['residents_id'])
             if(re.transferSatisfiedMonth):
