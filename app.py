@@ -139,6 +139,7 @@ class GetResidents(Resource):
 @api.route('/transfer')
 class CreateTransfer(Resource):
     # create new transfer
+    @api.marshal_with(model_single_resident)
     def post(self):
         args = transfer_parser.parse_args()
         # if same date record has alredy been existing
@@ -157,7 +158,9 @@ class CreateTransfer(Resource):
                 db.session.add(re)
             
         db.session.commit()
-        return "success"
+        res = Residents.query.filter_by(id=id).first()
+        return res
+        
     def delete(self):
         args = transfer_delete_parser.parse_args()
         tr = Transfer.query.get(args['id'])
