@@ -62,6 +62,8 @@ residents_parser.add_argument('apartment_id', type=int, location='json')
 
 residents_get_parser = reqparse.RequestParser()
 residents_get_parser.add_argument('apartment_id', location='args')
+residents_get_parser.add_argument('billing', location='args')
+
 
 residents_update_parser = residents_parser.copy()
 residents_update_parser.add_argument('id', type = int, location='json', required=True)
@@ -120,6 +122,9 @@ class GetResidents(Resource):
             # if apartment id is specified
             res = Residents.query.filter_by(apartment_id=req['apartment_id']).order_by(Residents.fullName).all()
         
+        elif (req['billing']):
+            # if billing mode, return all residents who uses billing commanny
+            res = Residents.query.filter(Residents.guaranteeCompany != None).order_by(Residents.fullName).all()
         else:
             # or get all
             res = Residents.query.order_by(Residents.fullName).all()
