@@ -60,6 +60,9 @@ residents_parser.add_argument('roomNo', location='json')
 residents_parser.add_argument('parkingLotNo', location='json')
 residents_parser.add_argument('apartment_id', type=int, location='json')
 
+residents_get_parser = reqparse.RequestParser()
+residents_get_parser.add_argument('apartment_id', location='args')
+
 residents_update_parser = residents_parser.copy()
 residents_update_parser.add_argument('id', type = int, location='json', required=True)
 
@@ -112,8 +115,17 @@ class GetResidentDetail(Resource):
 class GetResidents(Resource):
     @api.marshal_with(model_residents)
     def get(self):
-        res = Residents.query.order_by(Residents.fullName).all()
+        req = residents_get_parser.parse_args()
+        if (req):
+            # if apartment id is specified
+            res = Residents.query.filter_by(apartment_id=req['apartment_id']).order_by(Residents.fullName).all()
+        
+        else:
+            # or get all
+            res = Residents.query.order_by(Residents.fullName).all()
+        
         for idx, re in enumerate(res):
+            # get latest treansfer and set to res
             if(re.transfer):
                 setattr(res[idx], 'lastTransferDate', re.transfer[0].transferDate)
                 setattr(res[idx], 'lastTransferAmount', re.transfer[0].transferAmount)
@@ -140,7 +152,6 @@ class GetResidents(Resource):
 @api.route('/transfer')
 class CreateTransfer(Resource):
     # create new transfer
-    @api.marshal_with(model_residents)
     def post(self):
         args = transfer_parser.parse_args()
         
@@ -161,8 +172,7 @@ class CreateTransfer(Resource):
 
         db.session.add(tr)
         db.session.commit()
-        res = Residents.query.all()
-        return res
+        return "success"
         
     def delete(self):
         args = transfer_delete_parser.parse_args()
