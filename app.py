@@ -177,6 +177,9 @@ class CreateTransfer(Resource):
 class CreateBilling(Resource):
     def post(self):
         args = billing_parser.parse_args()
+        # if same date record has alredy been existing
+        if(Billing.query.filter_by(billingDate=args['billingDate']).filter_by(residents_id=args['residents_id'])).all():
+            abort(409)
         br = Billing(**args)
         db.session.add(br)
         db.session.commit()
