@@ -83,7 +83,7 @@ billing_delete_parser.add_argument('id', type=int, location='json', required=Tru
 
 @api.route('/apartment')
 class GetApartments(Resource):
-    @api.marshal_with(model_apartment, envelope='resource')
+    @api.marshal_with(model_apartment)
     def get(self):
         ap = Apartment.query.all()
         return ap
