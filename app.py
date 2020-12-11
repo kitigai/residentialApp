@@ -116,7 +116,7 @@ class GetResidents(Resource):
     @api.marshal_with(model_residents)
     def get(self):
         req = residents_get_parser.parse_args()
-        if (req):
+        if (req['apartment_id']):
             # if apartment id is specified
             res = Residents.query.filter_by(apartment_id=req['apartment_id']).order_by(Residents.fullName).all()
         
