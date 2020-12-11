@@ -112,7 +112,7 @@ class GetResidentDetail(Resource):
 class GetResidents(Resource):
     @api.marshal_with(model_residents)
     def get(self):
-        res = Residents.query.all()
+        res = Residents.query.order_by(Residents.fullName).all()
         for idx, re in enumerate(res):
             if(re.transfer):
                 setattr(res[idx], 'lastTransferDate', re.transfer[0].transferDate)
