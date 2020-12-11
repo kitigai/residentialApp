@@ -41,7 +41,7 @@ model_apartment = api.model('Apartment', {
     'id': fields.Integer,
     'name': fields.String,
     'address': fields.String,
-    # 'residents': fields.Nested(model_residents),
+    'residents': fields.Nested(model_residents),
 })
 
 apartment_parser = reqparse.RequestParser()
