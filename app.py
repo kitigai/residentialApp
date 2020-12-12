@@ -4,6 +4,7 @@ from flask_restplus import Resource, Api, fields, reqparse
 from models import app, db, Apartment, Residents, Transfer, Billing
 import datetime
 from dateutil.relativedelta import relativedelta
+from sqlalchemy import extract  
 
 # app = Flask(__name__)
 CORS(app)
@@ -42,6 +43,8 @@ model_apartment = api.model('Apartment', {
     'name': fields.String,
     'address': fields.String,
     'residents': fields.Nested(model_residents),
+    'transferSummary': fields.List(fields.Integer),
+
 })
 
 apartment_parser = reqparse.RequestParser()
@@ -50,6 +53,12 @@ apartment_parser.add_argument('address', location='json')
 
 apartment_update_parser = apartment_parser.copy()
 apartment_update_parser.add_argument('id', type=int, location='json', required=True)
+
+apartment_summary_parser = reqparse.RequestParser()
+apartment_summary_parser.add_argument('id', type=int, location='args')
+apartment_summary_parser.add_argument('startMonth', type=int, location='args')
+apartment_summary_parser.add_argument('startYear', type=int, location='args')
+apartment_summary_parser.add_argument('span', type=int, location='args')
 
 residents_parser = reqparse.RequestParser()
 residents_parser.add_argument('fullName', location='json', required=True)
@@ -85,9 +94,36 @@ billing_delete_parser.add_argument('id', type=int, location='json', required=Tru
 
 @api.route('/apartment')
 class GetApartments(Resource):
+    def calcSummary(self, id, month, year):
+        residents_id = [res.id for res in Apartment.query.get(id).residents]
+        residentSum = []
+        for id in residents_id:
+            transfer = (
+                db.session.query(Transfer)
+                .filter(extract('month',Transfer.transferDate)==month)
+                .filter(extract('year',Transfer.transferDate)==year)
+                .filter(Transfer.residents_id == id)
+                .all()
+                )
+            amounts = sum([tr.transferAmount for tr in transfer])
+            residentSum.append(amounts)
+        total = sum(residentSum)
+        return total
     @api.marshal_with(model_apartment)
     def get(self):
-        ap = Apartment.query.all()
+        args= apartment_summary_parser.parse_args()
+        if (args['id'] and args['startMonth'] and args['startYear'] and args['span']):
+            total = []
+            deltas = [i for i in range(-args['span']+1, 1, 1)]
+            now = datetime.date(args['startYear'], args['startMonth'], 1)
+            deltaDates = [now + relativedelta(months=+delta) for delta in deltas]
+            for deltaMonth in deltaDates:
+                total.append(self.calcSummary(args['id'], deltaMonth.month, deltaMonth.year))
+            ap = Apartment.query.get(args['id'])
+            print(total)
+            setattr(ap, 'transferSummary', total)
+        else:
+            ap = Apartment.query.all()
         return ap
     def post(self):
         args = apartment_parser.parse_args()
