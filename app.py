@@ -72,6 +72,8 @@ residents_parser.add_argument('apartment_id', type=int, location='json')
 residents_get_parser = reqparse.RequestParser()
 residents_get_parser.add_argument('apartment_id', location='args')
 residents_get_parser.add_argument('billing', location='args')
+residents_get_parser.add_argument('id', location='args')
+
 
 
 residents_update_parser = residents_parser.copy()
