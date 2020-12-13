@@ -38,7 +38,7 @@ model_single_resident = model_residents.clone('Residents_Single', {
     'transfer': fields.Nested(model_transfer),
     'billing': fields.Nested(model_billing),
     'apartment_id': fields.Integer,
-    'apartmentName': field.String,
+    'apartmentName': fields.String,
 })
 model_apartment = api.model('Apartment', {
     'id': fields.Integer,
