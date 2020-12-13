@@ -37,6 +37,8 @@ model_residents = api.model('Residents', {
 model_single_resident = model_residents.clone('Residents_Single', {
     'transfer': fields.Nested(model_transfer),
     'billing': fields.Nested(model_billing),
+    'apartment_id': fields.Integer,
+    'apartmentName': field.String,
 })
 model_apartment = api.model('Apartment', {
     'id': fields.Integer,
@@ -151,7 +153,9 @@ class GetApartments(Resource):
 class GetResidentDetail(Resource):
     @api.marshal_with(model_single_resident)
     def get(self, id):
-        res = Residents.query.filter_by(id=id).all()
+        res = Residents.query.filter_by(id=id).first()
+        setattr(res, 'apartment_id', res.apartment.id)
+        setattr(res, 'apartmentName', res.apartment.name)
         return res
 @api.route('/residents')
 class GetResidents(Resource):
