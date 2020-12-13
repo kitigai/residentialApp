@@ -124,6 +124,8 @@ class GetApartments(Resource):
             ap = Apartment.query.get(args['id'])
             print(total)
             setattr(ap, 'transferSummary', total)
+        elif (args['id']):
+            ap = Apartment.query.filter_by(id=args['id']).all()
         else:
             ap = Apartment.query.all()
         return ap
@@ -149,7 +151,7 @@ class GetApartments(Resource):
 class GetResidentDetail(Resource):
     @api.marshal_with(model_single_resident)
     def get(self, id):
-        res = Residents.query.filter_by(id=id).first()
+        res = Residents.query.filter_by(id=id).all()
         return res
 @api.route('/residents')
 class GetResidents(Resource):
