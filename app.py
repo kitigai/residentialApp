@@ -161,7 +161,7 @@ class GetResidents(Resource):
             res = Residents.query.filter_by(apartment_id=req['apartment_id']).order_by(Residents.fullName).all()
         elif (req['id']):
             # if id is specified
-            res = Residents.query.filter_by(id=req['id']).first()
+            res = Residents.query.get(req['id'])
         elif (req['billing']):
             # if billing mode, return all residents who uses billing commanny
             res = Residents.query.filter(Residents.guaranteeCompany != None).order_by(Residents.fullName).all()
