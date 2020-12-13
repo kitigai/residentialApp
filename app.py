@@ -124,7 +124,6 @@ class GetApartments(Resource):
             for deltaMonth in deltaDates:
                 total.append(self.calcSummary(args['id'], deltaMonth.month, deltaMonth.year))
             ap = Apartment.query.get(args['id'])
-            print(total)
             setattr(ap, 'transferSummary', total)
         elif (args['id']):
             ap = Apartment.query.filter_by(id=args['id']).all()
@@ -155,8 +154,8 @@ class GetResidentDetail(Resource):
     def get(self, id):
         res = Residents.query.filter_by(id=id).all()
         if(res):
-            setattr(res[0], 'apartment_id', res.apartment.id)
-            setattr(res[0], 'apartmentName', res.apartment.name)
+            setattr(res[0], 'apartment_id', res[0].apartment.id)
+            setattr(res[0], 'apartmentName', res[0].apartment.name)
         return res
 @api.route('/residents')
 class GetResidents(Resource):
