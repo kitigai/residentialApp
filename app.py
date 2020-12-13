@@ -153,9 +153,10 @@ class GetApartments(Resource):
 class GetResidentDetail(Resource):
     @api.marshal_with(model_single_resident)
     def get(self, id):
-        res = Residents.query.filter_by(id=id).first()
-        setattr(res, 'apartment_id', res.apartment.id)
-        setattr(res, 'apartmentName', res.apartment.name)
+        res = Residents.query.filter_by(id=id).all()
+        if(res):
+            setattr(res[0], 'apartment_id', res.apartment.id)
+            setattr(res[0], 'apartmentName', res.apartment.name)
         return res
 @api.route('/residents')
 class GetResidents(Resource):
