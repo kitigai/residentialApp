@@ -76,7 +76,8 @@ residents_get_parser.add_argument('apartment_id', location='args')
 residents_get_parser.add_argument('billing', location='args')
 residents_get_parser.add_argument('id', location='args')
 
-
+residents_delete_parser = reqparse.RequestParser()
+residents_delete_parser.add_argument("id", location='args')
 
 residents_update_parser = residents_parser.copy()
 residents_update_parser.add_argument('id', type = int, location='json', required=True)
@@ -117,6 +118,7 @@ class GetApartments(Resource):
     def get(self):
         args= apartment_summary_parser.parse_args()
         if (args['id'] and args['startMonth'] and args['startYear'] and args['span']):
+            # return month income summary 
             total = []
             deltas = [i for i in range(-args['span']+1, 1, 1)]
             now = datetime.date(args['startYear'], args['startMonth'], 1)
@@ -124,9 +126,13 @@ class GetApartments(Resource):
             for deltaMonth in deltaDates:
                 total.append(self.calcSummary(args['id'], deltaMonth.month, deltaMonth.year))
             ap = Apartment.query.get(args['id'])
+            re = Residents.query.filter_by(apartment_id = args['id']).filter_by(delete=False).order_by(Residents.fullName).all()
+            setattr(ap, 'residents', re)
             setattr(ap, 'transferSummary', total)
         elif (args['id']):
+            re = Residents.query.filter_by(apartment_id = args['id']).filter_by(delete=False).order_by(Residents.fullName).all()
             ap = Apartment.query.filter_by(id=args['id']).all()
+            setattr(ap[0], 'residents', re)
         else:
             ap = Apartment.query.all()
         return ap
@@ -152,7 +158,7 @@ class GetApartments(Resource):
 class GetResidentDetail(Resource):
     @api.marshal_with(model_single_resident)
     def get(self, id):
-        res = Residents.query.filter_by(id=id).all()
+        res = Residents.query.filter_by(id=id).filter_by(delete=False).all()
         if(res):
             setattr(res[0], 'apartment_id', res[0].apartment.id)
             setattr(res[0], 'apartmentName', res[0].apartment.name)
@@ -167,13 +173,13 @@ class GetResidents(Resource):
             res = Residents.query.filter_by(apartment_id=req['apartment_id']).order_by(Residents.fullName).all()
         elif (req['id']):
             # if id is specified
-            res = Residents.query.filter_by(id=req['id']).all()
+            res = Residents.query.filter_by(id=req['id']).filter_by(delete=False).all()
         elif (req['billing']):
-            # if billing mode, return all residents who uses billing commanny
-            res = Residents.query.filter(Residents.guaranteeCompany != None).order_by(Residents.fullName).all()
+            # if billing mode, return all residents who uses billing company
+            res = Residents.query.filter(Residents.guaranteeCompany != None).filter_by(delete=False).order_by(Residents.fullName).all()
         else:
             # or get all
-            res = Residents.query.order_by(Residents.fullName).all()
+            res = Residents.query.filter_by(delete=False).order_by(Residents.fullName).all()
         
         for idx, re in enumerate(res):
             # get latest treansfer and set to res
@@ -196,6 +202,13 @@ class GetResidents(Resource):
         res = Residents.query.get(args["id"])
         for key, value in args.items():
             setattr(res, key, value)                
+        db.session.add(res)
+        db.session.commit()
+        return "success"
+    def delete(self):
+        args = residents_delete_parser.parse_args()
+        res = Residents.query.get(args["id"])
+        res.delete = True
         db.session.add(res)
         db.session.commit()
         return "success"

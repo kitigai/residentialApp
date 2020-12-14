@@ -16,6 +16,7 @@ class Apartment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True, nullable=False)
     address = db.Column(db.String, unique=False, nullable=True)
+    delete = db.Column(db.Boolean, unique=False, nullable=True, default=True)
     residents = db.relationship('Residents', backref='apartment', lazy=True, order_by='Residents.fullName')
     def __repr__(self):
             return '<Apartment %r>' % self.name
@@ -28,6 +29,7 @@ class Residents(db.Model):
     roomNo = db.Column(db.String, unique=False, nullable=True)
     parkingLotNo = db.Column(db.String, unique=False, nullable=True)
     apartment_id = db.Column(db.Integer, db.ForeignKey('apartment.id'), nullable=False)
+    delete = db.Column(db.Boolean, unique=False, nullable=True, default=True)
     transfer = db.relationship('Transfer', backref='residents', lazy=True, order_by='desc(Transfer.transferDate)')
     billing = db.relationship('Billing', backref='residents', lazy=True, order_by='desc(Billing.billingDate)')
     def __repr__(self):
