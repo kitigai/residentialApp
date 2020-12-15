@@ -100,20 +100,26 @@ billing_delete_parser.add_argument('id', type=int, location='json', required=Tru
 @api.route('/apartment')
 class GetApartments(Resource):
     def calcSummary(self, id, month, year):
-        residents_id = [res.id for res in Apartment.query.get(id).residents]
+        apartment = Apartment.query.get(id)
         residentSum = []
-        for id in residents_id:
+        for resident in apartment.residents:
             transfer = (
                 db.session.query(Transfer)
                 .filter(extract('month',Transfer.transferDate)==month)
                 .filter(extract('year',Transfer.transferDate)==year)
-                .filter(Transfer.residents_id == id)
+                .filter(Transfer.residents_id == resident.id)
                 .all()
                 )
             amounts = sum([tr.transferAmount for tr in transfer])
             residentSum.append(amounts)
         total = sum(residentSum)
         return total
+    def calcMultipleSummary(self, ap, deltaDates):
+        total = [self.calcSummary(ap.id, deltaMonth.month, deltaMonth.year) for deltaMonth in deltaDates]
+        re = Residents.query.filter_by(apartment_id = ap.id).filter_by(delete=False).order_by(Residents.fullName).all()
+        setattr(ap, 'residents', re)
+        setattr(ap, 'transferSummary', total)
+        return ap
     @api.marshal_with(model_apartment)
     def get(self):
         args= apartment_summary_parser.parse_args()
@@ -127,8 +133,19 @@ class GetApartments(Resource):
                 total.append(self.calcSummary(args['id'], deltaMonth.month, deltaMonth.year))
             ap = Apartment.query.get(args['id'])
             re = Residents.query.filter_by(apartment_id = args['id']).filter_by(delete=False).order_by(Residents.fullName).all()
-            setattr(ap, 'residents', re)
+            if (re):
+                setattr(ap, 'residents', re)
+            else:
+                setattr(ap, 'residents', [])
             setattr(ap, 'transferSummary', total)
+        elif (args['startMonth'] and args['startYear'] and args['span']):
+            apbef = Apartment.query.all()
+            deltas = [i for i in range(-args['span']+1, 1, 1)]
+            now = datetime.date(args['startYear'], args['startMonth'], 1)
+            deltaDates = [now + relativedelta(months=+delta) for delta in deltas]
+            ap = []
+            for idx,apartment in enumerate(apbef):
+                ap.append(self.calcMultipleSummary(apartment, deltaDates))
         elif (args['id']):
             re = Residents.query.filter_by(apartment_id = args['id']).filter_by(delete=False).order_by(Residents.fullName).all()
             ap = Apartment.query.filter_by(id=args['id']).all()
