@@ -88,14 +88,14 @@ transfer_parser.add_argument('transferAmount', type=int, location='json', requir
 transfer_parser.add_argument('residents_id', type=int, location='json', required=True)
 
 transfer_delete_parser = reqparse.RequestParser()
-transfer_delete_parser.add_argument('id', type=int, location='json', required=True)
+transfer_delete_parser.add_argument('id', type=int, location='args', required=True)
 
 billing_parser = reqparse.RequestParser()
 billing_parser.add_argument('billingDate', location='json', required=True)
 billing_parser.add_argument('residents_id', type=int, location='json', required=True)
 
 billing_delete_parser = reqparse.RequestParser()
-billing_delete_parser.add_argument('id', type=int, location='json', required=True)
+billing_delete_parser.add_argument('id', type=int, location='args', required=True)
 
 @api.route('/apartment')
 class GetApartments(Resource):
