@@ -169,7 +169,15 @@ class GetApartments(Resource):
         db.session.add(ap)
         db.session.commit()
         return "success"
-
+    def delete(self):
+        args = apartment_delete_parser.parse_args()
+        ap = Apartment.query.get(args['id'])
+        if ap == None:
+            abort(400)
+        ap.delete = True
+        db.session.add(ap)
+        db.session.commit()
+        return "success"
 
 @api.route('/residents/<int:id>')
 class GetResidentDetail(Resource):
